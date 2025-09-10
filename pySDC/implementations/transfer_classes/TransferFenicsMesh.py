@@ -19,6 +19,16 @@ class mesh_to_mesh_fenics(SpaceTransfer):
         """
         if isinstance(F, fenics_mesh):
             u_coarse = fenics_mesh(df.project(F.values, self.coarse_prob.init))
+            #print(f"coarseOLD: {u_coarse.values.vector()[:]}")
+
+            u_coarse.values.vector()[0] = F.values.vector()[0] + 0.5 * F.values.vector()[1]
+            n = len(u_coarse.values.vector())
+            for i in range(1,n-1):
+                u_coarse.values.vector()[i] = 0.5 * F.values.vector()[2*i-1] + F.values.vector()[2*i] + 0.5 * F.values.vector()[2*i+1]
+            u_coarse.values.vector()[n-1] = 0.5 * F.values.vector()[2*n-3] + F.values.vector()[2*n-2]
+            print(f"coarseNEW: {u_coarse.values.vector()[:]}")
+            print(f"fine: {F.values.vector()[:]}")
+
         elif isinstance(F, rhs_fenics_mesh):
             u_coarse = rhs_fenics_mesh(self.coarse_prob.init)
             u_coarse.impl.values = df.project(F.impl.values, self.coarse_prob.init)
