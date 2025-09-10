@@ -41,6 +41,8 @@ class base_transfer_mass(BaseTransfer):
         tmp_u = []
         for m in range(1, SF.coll.num_nodes + 1):
             tmp_u.append(self.space_transfer.project(F.u[m]))
+            #print(f"\n\nProjectOld:\n{(F.u[m]).values.vector()[:]}")
+            #print(f"ProjectNew:{self.space_transfer.project(F.u[m]).values.vector()[:]}\n\n")
 
         # restrict collocation values
         G.u[0] = self.space_transfer.project(F.u[0])
@@ -70,6 +72,8 @@ class base_transfer_mass(BaseTransfer):
         tmp_tau = []
         for m in range(SF.coll.num_nodes):
             tmp_tau.append(self.space_transfer.restrict(tauF[m]))
+            #print(f"\n\nRestrictOld:\n{(tauF[m]).values.vector()[:]}")
+            #print(f"RestrictNew:{self.space_transfer.restrict(tauF[m]).values.vector()[:]}\n\n")
 
         # restrict fine level tau correction part in collocation
         tauFG = []
@@ -136,6 +140,8 @@ class base_transfer_mass(BaseTransfer):
         tmp_u = []
         for m in range(1, SG.coll.num_nodes + 1):
             tmp_u.append(self.space_transfer.prolong(G.u[m] - G.uold[m]))
+            #print(f"\n\nProlongOld:\n{(G.u[m]).values.vector()[:]}")
+            #print(f"ProlongNew:{self.space_transfer.prolong(G.u[m]).values.vector()[:]}\n\n")
 
         # interpolate values in collocation
         # F.u[0] += tmp_u[0]
