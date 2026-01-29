@@ -3,7 +3,7 @@ import numpy as np
 from pySDC.core.sweeper import Sweeper
 
 
-class imex_1st_order(Sweeper):
+class imex_1st_order_test(Sweeper):
     """
     Custom sweeper class, implements Sweeper.py
 

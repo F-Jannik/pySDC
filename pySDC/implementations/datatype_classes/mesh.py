@@ -21,7 +21,7 @@ class mesh(np.ndarray):
     comm = None
     xp = np
 
-    def __new__(cls, init, val=0.0, **kwargs):
+    def __new__(cls, init, val=None, **kwargs):
         """
         Instantiates new datatype. This ensures that even when manipulating data, the result is still a mesh.
 
@@ -42,8 +42,17 @@ class mesh(np.ndarray):
             and isinstance(init[2], np.dtype)
         ):
             obj = np.ndarray.__new__(cls, init[0], dtype=init[2], **kwargs)
-            obj.fill(val)
+            if val:
+                obj.fill(val)
+            else:
+                obj.fill(0.0)
             cls.comm = init[1]
+        elif isinstance(init, np.ndarray):
+            obj = np.ndarray.__new__(cls, init.size)
+            if val is not None:
+                obj.fill(val)
+            else:
+                obj[:] = init[:]
         else:
             raise NotImplementedError(type(init))
         return obj

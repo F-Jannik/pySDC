@@ -37,6 +37,9 @@ class base_transfer_mass(BaseTransfer):
         if not F.status.unlocked:
             raise UnlockError('fine level is still locked, cannot use data from there')
 
+
+        # === Point 1 ===
+
         # restrict fine values in space
         tmp_u = []
         for m in range(1, SF.coll.num_nodes + 1):
@@ -51,10 +54,16 @@ class base_transfer_mass(BaseTransfer):
             for m in range(1, SF.coll.num_nodes):
                 G.u[n] += self.Rcoll[n - 1, m] * tmp_u[m]
 
+        # === End Point 1 ===
+
         # re-evaluate f on coarse level
         G.f[0] = PG.eval_f(G.u[0], G.time)
         for m in range(1, SG.coll.num_nodes + 1):
             G.f[m] = PG.eval_f(G.u[m], G.time + G.dt * SG.coll.nodes[m - 1])
+
+        # === Point 2 ===
+
+        # == CF ==
 
         # build coarse level tau correction part
         tauG = G.sweep.integrate()
@@ -62,11 +71,17 @@ class base_transfer_mass(BaseTransfer):
         for m in range(SG.coll.num_nodes):
             tauG[m] = PG.apply_mass_matrix(G.u[m + 1]) - tauG[m]
 
+        # == End CF ==
+        # == CF ==
+
         # build fine level tau correction part
         tauF = F.sweep.integrate()
 
         for m in range(SF.coll.num_nodes):
             tauF[m] = PF.apply_mass_matrix(F.u[m + 1]) - tauF[m]
+
+        # == End CF ==
+        # == T.T ==
 
         # restrict fine level tau correction part in space
         tmp_tau = []
@@ -81,6 +96,8 @@ class base_transfer_mass(BaseTransfer):
             tauFG.append(self.Rcoll[n - 1, 0] * tmp_tau[0])
             for m in range(1, SF.coll.num_nodes):
                 tauFG[-1] += self.Rcoll[n - 1, m] * tmp_tau[m]
+
+        # == End T.T ==
 
         # build tau correction
         for m in range(SG.coll.num_nodes):
@@ -98,6 +115,8 @@ class base_transfer_mass(BaseTransfer):
                     G.tau[n] += self.Rcoll[n, m] * tmp_tau[m]
         else:
             pass
+
+        # === End Point 2 ===
 
         # save u and rhs evaluations for interpolation
         for m in range(1, SG.coll.num_nodes + 1):
@@ -136,6 +155,8 @@ class base_transfer_mass(BaseTransfer):
 
         # build coarse correction
 
+        # === Point 4 ===
+
         # interpolate values in space first
         tmp_u = []
         for m in range(1, SG.coll.num_nodes + 1):
@@ -148,6 +169,8 @@ class base_transfer_mass(BaseTransfer):
         for n in range(1, SF.coll.num_nodes + 1):
             for m in range(SG.coll.num_nodes):
                 F.u[n] += self.Pcoll[n - 1, m] * tmp_u[m]
+
+        # === End Point 4 ===
 
         # re-evaluate f on fine level
         # F.f[0] = PF.eval_f(F.u[0], F.time)

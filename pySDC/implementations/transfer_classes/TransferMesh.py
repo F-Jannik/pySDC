@@ -144,7 +144,43 @@ class mesh_to_mesh(SpaceTransfer):
 
             self.Rspace = Rspace[0]
             for i in range(1, len(Rspace)):
-                self.Rspace = sp.kron(self.Rspace, Rspace[i], format='csc')
+                 self.Rspace = sp.kron(self.Rspace, Rspace[i], format='csc')
+    
+    
+    def project(self, F): #for now just a copy of restrict
+        """
+        Restriction implementation
+        Args:
+            F: the fine level data (easier to access than via the fine attribute)
+        """
+        G = type(F)(self.coarse_prob.init)
+
+        def _restrict(fine, coarse):
+            if hasattr(self.fine_prob, 'ncomp'):
+                for i in range(self.fine_prob.ncomp):
+                    if fine.shape[-1] == self.fine_prob.ncomp:
+                        tmpF = fine[..., i].flatten()
+                        tmpG = self.Rspace.dot(tmpF)
+                        coarse[..., i] = tmpG.reshape(self.coarse_prob.nvars)
+                    elif fine.shape[0] == self.fine_prob.ncomp:
+                        tmpF = fine[i, ...].flatten()
+                        tmpG = self.Rspace.dot(tmpF)
+                        coarse[i, ...] = tmpG.reshape(self.coarse_prob.nvars)
+                    else:
+                        raise TransferError('Don\'t know how to restrict for this problem with multiple components')
+            else:
+                tmpF = fine.flatten()
+                tmpG = self.Rspace.dot(tmpF)
+                coarse[:] = tmpG.reshape(self.coarse_prob.nvars)
+
+        if hasattr(type(F), 'components'):
+            for comp in F.components:
+                _restrict(F.__getattr__(comp), G.__getattr__(comp))
+        elif type(F).__name__ == 'mesh':
+            _restrict(F, G)
+        else:
+            raise TransferError('Wrong data type for restriction, got %s' % type(F))
+        return G
 
     def restrict(self, F):
         """
@@ -170,6 +206,7 @@ class mesh_to_mesh(SpaceTransfer):
             else:
                 tmpF = fine.flatten()
                 tmpG = self.Rspace.dot(tmpF)
+                tmpG = self.Pspace.T.dot(tmpF)
                 coarse[:] = tmpG.reshape(self.coarse_prob.nvars)
 
         if hasattr(type(F), 'components'):
