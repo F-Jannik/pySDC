@@ -102,7 +102,7 @@ def setup_mpl(font_size=8, reset=False):
 
     if shutil.which('latex'):
         latex_support = {
-            "pgf.texsystem": "pdflatex",  # change this if using xetex or lautex
+            "pgf.texsystem": "lualatex",  # change this if using xetex or lautex
             "text.usetex": True,  # use LaTeX to write all text
             "pgf.preamble": r"\usepackage[utf8x]{inputenc}"
             r"\usepackage[T1]{fontenc}"

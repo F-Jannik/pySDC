@@ -32,9 +32,13 @@ def file_to_plot(file):
         for key, value in groups.items():
             x, y = zip(*value)
             plt.plot(x, y, marker = "o", label=label+key)
+            order = (y[0]/x[0]) / (y[-1]/x[-1]) / (len(x)-1)
+            plt.plot([x[0],x[-1]], [y[0],y[-1]], label=f"order={order:4.2f}")
     else:
         x, y = zip(*tuples)
         plt.plot(x, y, marker = "o")
+        order = (y[0]/x[0]) / (y[-1]/x[-1]) / (len(x)-1)
+        plt.plot([x[0],x[-1]], [y[0],y[-1]], label=f"order={order:4.2f}")
 
     plt.title(file)
     plt.xlabel(x_axis)
@@ -54,7 +58,7 @@ def file_to_plot(file):
 #file_to_plot("Iter_Errors_noM_both.txt")
 #file_to_plot("Iter_Errors_M_both.txt")
 file_to_plot("Iter_Errors_noM.txt")
-file_to_plot("Iter_Errors_M.txt")
+# file_to_plot("Iter_Errors_M.txt")
 # file_to_plot("Iter_Errors_noM2.txt")
 # file_to_plot("Iter_Errors_M2.txt")
 plt.show()
